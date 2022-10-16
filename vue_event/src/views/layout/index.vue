@@ -129,7 +129,7 @@ export default {
     // 请求侧边栏数据
     async getMenuListFn() {
       const res = await getMenuListAPI()
-      console.log(res)
+      //   console.log(res)
       this.menus = res.data.data
     }
   },

@@ -25,7 +25,7 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submitFn">提交修改</el-button>
-        <el-button>重置</el-button>
+        <el-button @click="resetFn">重置</el-button>
       </el-form-item>
     </el-form>
   </el-card>
@@ -74,6 +74,13 @@ export default {
           return false
         }
       })
+    },
+    // 重置按钮
+    resetFn() {
+    //   this.userForm.email = ''
+    //   this.userForm.nickname = ''
+    // 利用element-ui提供的方法重置输入框
+      this.$refs.userFormRef.resetFields()
     }
   }
 }

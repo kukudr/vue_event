@@ -5,8 +5,9 @@
     </div>
     <div>
       <!-- 图片，用来展示用户选择的头像 -->
-      <img class="the_img" src="../../assets/images/avatar.jpg" alt="" />
 
+      <img v-if="!avatar" class="the_img" src="../../assets/images/avatar.jpg" alt="" />
+    <img v-else class="the_img" :src="avatar" alt="">
       <!-- 按钮区域 -->
       <div class="btn-box">
         <input type="file" accept="image/*" style="display: none" ref="iptRef" @change="onFileChange" />
@@ -38,6 +39,17 @@ export default {
       } else {
         // 证明选择了文件默认只能够选择一个
         console.log(files[0])
+        // 选择的图片要放到img标签上作为预览
+        // 但是img标签的src值只能是图片的链接地址或者是base64字符串
+        // 解决办法1：让文件指向内存的临时地址
+        // 语法：URL.createObjectURL(文件)
+        // this.avatar = URL.createObjectURL(files[0])
+        // 解决方法2:转换成base64格式的就可以传送给后台
+        const fr = new FileReader()
+        fr.readAsDataURL(files[0]) // 传入文件对象开始读
+        fr.onload = (e) => { // onload等待把文件读取成base64字符串后触发onlosd事件函数
+          this.avatar = e.target.result// e.target.result就是读取完的结果
+        }
       }
     }
   }

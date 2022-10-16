@@ -1,9 +1,10 @@
 <template>
   <div>
+    <!-- 预览文章分类 -->
     <el-card class="box-card">
       <div slot="header" class="clearfix header-box">
         <span>文章分类</span>
-        <el-button type="primary" size="mini">添加分类</el-button>
+        <el-button type="primary" size="mini"  @click="addCateShowDialogFn">添加分类</el-button>
       </div>
       <!-- //分类数据表格 -->
       <el-table :data="cateList" style="width: 100%" border stripe>
@@ -17,6 +18,17 @@
         </el-table-column>
       </el-table>
     </el-card>
+    <!-- 添加文章分类列表对话框 -->
+    <el-dialog
+  title="提示"
+  :visible.sync="dialogVisible"
+  width="30%">
+  <span>这是一段信息</span>
+  <span slot="footer" class="dialog-footer">
+    <el-button @click="cancleFn">取 消</el-button>
+    <el-button type="primary" @click="confirmFn">确 定</el-button>
+  </span>
+</el-dialog>
   </div>
 </template>
 
@@ -26,6 +38,7 @@ export default {
   name: 'ArtCate',
   data() {
     return {
+      dialogVisible: false, // 添加文章分类列表对话框
       cateList: []// 文章分类数组
     }
   },
@@ -36,7 +49,17 @@ export default {
     async getArticleFn() {
       const res = await getArticleListAPI()
       this.cateList = res.data.data
-    }
+    },
+    // 添加分类按钮点击事件-》让对话框出现
+    addCateShowDialogFn() {
+      this.dialogVisible = true
+    },
+    // 对话框取消按钮点击事件
+    cancleFn() {
+      this.dialogVisible = false
+    },
+    // 对话框确定按钮点击事件，对话框消失调用保存文章分类接口
+    confirmFn() {}
   }
 }
 </script>

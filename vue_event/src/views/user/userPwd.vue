@@ -15,14 +15,15 @@
         <el-input v-model="pwdForm.re_pwd" type="password"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary">修改密码</el-button>
-        <el-button>重置</el-button>
+        <el-button type="primary" @click="updatePwd">修改密码</el-button>
+        <el-button @click="resetFn">重置</el-button>
       </el-form-item>
     </el-form>
   </el-card>
 </template>
 
 <script>
+import { updatePwdAPI } from '@/api'
 export default {
   name: 'UserPwd',
   data() {
@@ -69,6 +70,32 @@ export default {
         ]
       }
     }
+  },
+  methods: {
+    // 更新密码点击事件
+    updatePwd() {
+      this.$refs.pwdFormRef.validate(async valid => {
+        if (valid) {
+          const { data: res } = await updatePwdAPI(this.pwdForm)
+          if (res.code !== 0) {
+            return this.$message.error('原密码密码错误')
+          }
+          this.$message.success('重置密码成功')
+          this.$refs.pwdFormRef.resetFields()
+          // 重置密码（被动退出）
+          this.$store.commit('updateToken', '')
+          this.$store.commit('updateUserInfo', {})
+          this.$router.push('/login')
+        } else {
+          return false
+        }
+      })
+    },
+    // 点击重置表单数据
+    resetFn() {
+      this.$refs.pwdFormRef.resetFields()
+    }
+
   }
 }
 </script>

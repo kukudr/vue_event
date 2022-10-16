@@ -93,3 +93,19 @@ export const updateUserAvatarAPI = (avatar) => {
         }
     })
 }
+/**
+ * 更新用户密码
+ * @param {*} param0 {old_pwd 旧密码，new_pwd新密码，rep_pwd确认密码}
+ * @returns Problems对象
+ */
+export const updatePwdAPI = ({ old_pwd, new_pwd, re_pwd }) => {
+    return request({
+        url: '/my/updatepwd',
+        method: 'PATCH',
+        data: {
+            old_pwd,
+            new_pwd,
+            re_pwd
+        }
+    })
+}

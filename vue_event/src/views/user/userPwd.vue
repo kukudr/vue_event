@@ -26,6 +26,24 @@
 export default {
   name: 'UserPwd',
   data() {
+    // 新密码和旧密码不能一样
+    const samePwd = (rules, value, callback) => {
+      // value就是校验规则所对应的输入框的值
+      if (this.pwdForm.old_pwd === value) {
+        callback(new Error('新密码与旧密码不能一样'))
+      } else {
+        // 校验通过
+        callback()
+      }
+    }
+    // 新密码和确认密码要保持一致
+    const rePwd = (rules, value, callback) => {
+      if (this.pwdForm.new_pwd !== value) {
+        callback(new Error('两次输入的密码不一致'))
+      } else {
+        callback()
+      }
+    }
     return {
       // 表单的数据对象
       pwdForm: {
@@ -41,11 +59,13 @@ export default {
         ],
         new_pwd: [
           { required: true, message: '请输入新密码', trigger: 'blur' },
-          { pattern: /^\S{6,15}$/, message: '密码长度必须是6-15位的非空字符串', trigger: 'blur' }
+          { pattern: /^\S{6,15}$/, message: '密码长度必须是6-15位的非空字符串', trigger: 'blur' },
+          { validator: samePwd, trigger: 'blur' }
         ],
         re_pwd: [
           { required: true, message: '请再次确认新密码', trigger: 'blur' },
-          { pattern: /^\S{6,15}$/, message: '密码长度必须是6-15位的非空字符串', trigger: 'blur' }
+          { pattern: /^\S{6,15}$/, message: '密码长度必须是6-15位的非空字符串', trigger: 'blur' },
+          { validator: rePwd, trigger: 'blur' }
         ]
       }
     }

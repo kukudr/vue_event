@@ -47,8 +47,18 @@
             <el-option v-for="obj in cateList" :key="obj.id" :label="obj.cate_name" :value="obj.cate_id"></el-option>
         </el-select>
         </el-form-item>
+        <!-- 富文本编辑器 -->
         <el-form-item label="文章内容" prop="content">
             <quill-editor v-model="pubForm.content"></quill-editor>
+        </el-form-item>
+        <el-form-item label="文章封面">
+         <!-- 用来显示封面的图片 -->
+        <img src="../../assets/images/cover.jpg" alt="" class="cover-img" ref="imgRef" />
+        <br />
+        <!-- 文件选择框，默认被隐藏 -->
+        <input type="file" style="display: none;" accept="image/*" ref="iptFileRef" @change="changeCoverFn"/>
+        <!-- 选择封面的按钮 -->
+        <el-button type="text" @click="selCoverFn">+ 选择封面</el-button>
         </el-form-item>
     </el-form>
     </el-dialog>
@@ -72,7 +82,8 @@ export default {
       pubForm: { // 表单的数据对象
         title: '', // 文章的标题
         cate_id: '', // 文章的id
-        content: ''// 文章的内容
+        content: '', // 文章的内容
+        cover_img: ''// 封面图片保存的是个文件
       },
       pubFormRules: { // 表单的验证规则对象
         title: [
@@ -112,6 +123,21 @@ export default {
     async  getCateListFn() {
       const { data: res } = await getArticleListAPI()
       this.cateList = res.data
+    },
+    // 选择封面点击事件==》打开文件选择框
+    selCoverFn() {
+      this.$refs.iptFileRef.click()
+    },
+    changeCoverFn(e) {
+      // e.target.files可以拿到选择的文件数组
+      const files = e.target.files
+      if (files.length === 0) {
+        // 用户没有选择图片，就需要把cover_img属性置空
+        this.pubForm.cover_img = null
+      } else {
+        // 用户选择图片 会把图片直接保存在表单对象的属性上
+        this.pubForm.cover_img = files[0]
+      }
     }
   }
 }
@@ -132,5 +158,11 @@ export default {
 // [data-v-hash] .ql-editor 这样就能选中组件内的标签的class类名了
 ::v-deep .ql-editor {
   min-height: 300px;
+}
+// 设置图片封面的宽高
+.cover-img {
+  width: 400px;
+  height: 280px;
+  object-fit: cover;
 }
 </style>

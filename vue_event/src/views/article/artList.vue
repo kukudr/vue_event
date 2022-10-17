@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- 内容区域 -->
     <el-card class="box-card">
       <div slot="header" class="clearfix">
         <span>文章列表</span>
@@ -25,13 +26,20 @@
           </el-form-item>
         </el-form>
         <!-- 发表文章的按钮 -->
-        <el-button type="primary" size="small" class="btn-pub">发表文章</el-button>
+        <el-button type="primary" size="small" class="btn-pub" @click="showPubDialogFn">发表文章</el-button>
       </div>
 
       <!-- 文章表格区域 -->
 
       <!-- 分页区域 -->
     </el-card>
+    <!-- 发表文章的 Dialog 对话框 -->
+    <el-dialog title="发表文章"
+    :visible.sync="pubDialogVisible"
+    fullscreen
+    :before-close="handleClose">
+    <span>这是一段信息</span>
+    </el-dialog>
   </div>
 </template>
 
@@ -46,7 +54,27 @@ export default {
         pagesize: 2,
         cate_id: '',
         state: ''
-      }
+      },
+      pubDialogVisible: false// 控制文章对话框发表的
+    }
+  },
+  methods: {
+    // 发布文章对话框关闭前的回调
+    async handleClose(done) { // done作用就是调用就会关闭对话框
+      // 询问用户是否确认关闭对话框
+      const confirmResult = await this.$confirm('此操作将导致文章信息丢失, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => err)
+
+      // 取消了关闭-阻止住, 什么都不干
+      if (confirmResult === 'cancel') return
+      // 确认关闭
+      done()
+    },
+    showPubDialogFn() {
+      this.pubDialogVisible = true
     }
   }
 }

@@ -13,8 +13,11 @@
         <el-table-column prop="cate_name" label="分类名称"></el-table-column>
         <el-table-column prop="cate_alias" label="分类别名"></el-table-column>
         <el-table-column label="操作">
-          <el-button type="primary" size="mini">修改</el-button>
-          <el-button type="danger" size="mini">删除</el-button>
+            <!-- 这是一个作用域插槽 -->
+          <template v-slot="scope">
+             <el-button type="primary" size="mini" @click="updateCateFn(scope.row)">修改</el-button>
+             <el-button type="danger" size="mini">删除</el-button>
+         </template>
         </el-table-column>
       </el-table>
     </el-card>
@@ -107,6 +110,17 @@ export default {
     // 对话框关闭时的回调
     dialogCloseFn() {
       this.$refs.addRef.resetFields()
+    },
+    // 修改分类按钮的点击事件(先做数据的回显)
+    updateCateFn(obj) {
+      // obj的值是一个文章的对象
+      console.log(obj)
+      //   实现数据回显
+      // 先让弹窗出现
+      this.dialogVisible = true
+      // 然后让相应的值再输入框出现
+      this.addForm.cate_name = obj.cate_name
+      this.addForm.cate_alias = obj.cate_alias
     }
   }
 }

@@ -45,7 +45,13 @@
 </template>
 
 <script>
-import { getArticleListAPI, saveArticleAPI } from '@/api'
+// 同一个按钮想要状态区分
+// 定义标记变量isEdit还要定义本次想要编辑的数据唯一的id值，editId
+// 再点击修改的时候idEdit为true,editId保存要修改的数据的id
+// 再点击新增的时候idEdit为flase,editId置空
+// 再点击保存按钮的时候就可以用isEdit变量做区分了
+
+import { getArticleListAPI, saveArticleAPI, updateArtCateAPI } from '@/api'
 export default {
   name: 'ArtCate',
   data() {
@@ -56,6 +62,8 @@ export default {
         cate_name: '',
         cate_alias: ''
       },
+      isEdit: false,
+      editId: '',
       addRules: { // 添加表单的验证规则对象
         cate_name: [
           { required: true, message: '请输入分类名称', trigger: 'blur' },
@@ -78,6 +86,9 @@ export default {
     },
     // 添加分类按钮点击事件-》让对话框出现
     addCateShowDialogFn() {
+      // 状态区分
+      this.isEdit = false
+      this.editId = ''
       this.dialogVisible = true
     },
     // 对话框取消按钮点击事件
@@ -88,16 +99,27 @@ export default {
     confirmFn() {
       this.$refs.addRef.validate(async vaild => {
         if (vaild) {
-          // 通过校验
-          const { data: res } = await saveArticleAPI(this.addForm)
-          //   提示弹窗
-          if (res.code !== 0) {
-            return this.$message.error(res.message)
+          if (this.isEdit) {
+            // 修改的事件
+            this.addForm.id = this.editId
+            const { data: res } = await updateArtCateAPI(this.addForm)
+            if (res.code !== 0) {
+              return this.$message.error(res.message)
+            }
+            this.$message.success(res.message)
+            this.dialogVisible = false
+          } else {
+            // 通过校验
+            const { data: res } = await saveArticleAPI(this.addForm)
+            //   提示弹窗
+            if (res.code !== 0) {
+              return this.$message.error(res.message)
+            }
+            this.$message.success(res.message)
+            this.dialogVisible = false
           }
-          this.$message.success(res.message)
           //   console.log(res)
           // 添加成功后再次请求最新的数据让表格更新
-
           //   特别注意生命周期的函数不会挂载到this上
           this.getArticleFn()
         } else {
@@ -105,7 +127,6 @@ export default {
           return false
         }
       })
-      this.dialogVisible = false
     },
     // 对话框关闭时的回调
     dialogCloseFn() {
@@ -115,6 +136,9 @@ export default {
     updateCateFn(obj) {
       // obj的值是一个文章的对象
       console.log(obj)
+      //   实现状态区分
+      this.isEdit = true
+      this.editId = obj.id
       //   实现数据回显
       // 先让弹窗出现
       this.dialogVisible = true

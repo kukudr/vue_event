@@ -133,3 +133,19 @@ export const saveArticleAPI = ({ cate_name, cate_alias }) => {
         }
     })
 }
+/**
+ * 修改文章
+ * @param {*} param0 { id：文章id, cate_name:文章名称, cate_alias：文章别名 }
+ * @returns Promise对象
+ */
+export const updateArtCateAPI = ({ id, cate_name, cate_alias }) => {
+    return request({
+        url: '/my/cate/info',
+        method: 'PUT',
+        data: {
+            id,
+            cate_name,
+            cate_alias
+        }
+    })
+}

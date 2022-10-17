@@ -118,3 +118,18 @@ export const getArticleListAPI = () => {
         url: '/my/cate/list'
     })
 }
+/**
+ * 保存文章分类
+ * @param {*} param0 {cate_name分类名称,catealias分类别名}
+ * @returns Promise对象
+ */
+export const saveArticleAPI = ({ cate_name, cate_alias }) => {
+    return request({
+        url: '/my/cate/add',
+        method: 'POST',
+        data: {
+            cate_name,
+            cate_alias
+        }
+    })
+}

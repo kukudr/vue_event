@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { getArticleListAPI } from '@/api'
+import { getArticleListAPI, saveArticleAPI } from '@/api'
 export default {
   name: 'ArtCate',
   data() {
@@ -82,7 +82,29 @@ export default {
       this.dialogVisible = false
     },
     // 对话框确定按钮点击事件，对话框消失调用保存文章分类接口
-    confirmFn() {},
+    confirmFn() {
+      this.$refs.addRef.validate(async vaild => {
+        if (vaild) {
+          // 通过校验
+          const { data: res } = await saveArticleAPI(this.addForm)
+          //   提示弹窗
+          if (res.code !== 0) {
+            return this.$message.error(res.message)
+          }
+          this.$message.success(res.message)
+          //   console.log(res)
+          // 添加成功后再次请求最新的数据让表格更新
+
+          //   特别注意生命周期的函数不会挂载到this上
+          this.getArticleFn()
+        } else {
+          // 校验失败
+          return false
+        }
+      })
+      this.dialogVisible = false
+    },
+    // 对话框关闭时的回调
     dialogCloseFn() {
       this.$refs.addRef.resetFields()
     }

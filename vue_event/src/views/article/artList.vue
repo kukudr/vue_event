@@ -67,6 +67,8 @@
 
 <script>
 import { getArticleListAPI } from '@/api'
+// JS内部引入图片需要用import导入
+import imgObj from '@/assets/images/cover.jpg'
 export default {
   name: 'ArtList',
   data() {
@@ -134,9 +136,13 @@ export default {
       if (files.length === 0) {
         // 用户没有选择图片，就需要把cover_img属性置空
         this.pubForm.cover_img = null
+        this.$refs.imgRef.setAttribute('src', imgObj)
       } else {
         // 用户选择图片 会把图片直接保存在表单对象的属性上
         this.pubForm.cover_img = files[0]
+        // 把图片显示到img内部
+        const url = URL.createObjectURL(files[0])
+        this.$refs.imgRef.setAttribute('src', url)
       }
     }
   }

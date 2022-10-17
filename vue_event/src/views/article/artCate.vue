@@ -16,7 +16,7 @@
             <!-- 这是一个作用域插槽 -->
           <template v-slot="scope">
              <el-button type="primary" size="mini" @click="updateCateFn(scope.row)">修改</el-button>
-             <el-button type="danger" size="mini">删除</el-button>
+             <el-button type="danger" size="mini" @click="delArtCateFn(scope.row)">删除</el-button>
          </template>
         </el-table-column>
       </el-table>
@@ -51,7 +51,7 @@
 // 再点击新增的时候idEdit为flase,editId置空
 // 再点击保存按钮的时候就可以用isEdit变量做区分了
 
-import { getArticleListAPI, saveArticleAPI, updateArtCateAPI } from '@/api'
+import { getArticleListAPI, saveArticleAPI, updateArtCateAPI, delArtCateAPI } from '@/api'
 export default {
   name: 'ArtCate',
   data() {
@@ -142,9 +142,21 @@ export default {
       //   实现数据回显
       // 先让弹窗出现
       this.dialogVisible = true
-      // 然后让相应的值再输入框出现
-      this.addForm.cate_name = obj.cate_name
-      this.addForm.cate_alias = obj.cate_alias
+      //   让真实的DOM先创建并在内部绑定好复制好的初始值
+      this.$nextTick(() => {
+        // 然后让相应的值再输入框出现
+        this.addForm.cate_name = obj.cate_name
+        this.addForm.cate_alias = obj.cate_alias
+      })
+    },
+    async delArtCateFn(obj) {
+      const { data: res } = await delArtCateAPI(obj.id)
+      if (res.code !== 0) {
+        return this.$message.error(res.message)
+      }
+      this.$message.success(res.message)
+      //   删除后重新获取数据列表
+      this.getArticleFn()
     }
   }
 }

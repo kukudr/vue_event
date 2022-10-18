@@ -60,6 +60,10 @@
         <!-- 选择封面的按钮 -->
         <el-button type="text" @click="selCoverFn">+ 选择封面</el-button>
         </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="pubArticleFn('已发布')">发布</el-button>
+            <el-button type="info" @click="pubArticleFn('草稿')">存为草稿</el-button>
+        </el-form-item>
     </el-form>
     </el-dialog>
   </div>
@@ -67,9 +71,10 @@
 
 <script>
 import { getArticleListAPI } from '@/api'
-// JS内部引入图片需要用import导入
+// JS内部引入图片需要用import导入，webpack会把它当作模块数据，转换成打包后的图片路径还是base64字符串
 import imgObj from '@/assets/images/cover.jpg'
 export default {
+  // 在Vue变量内部引入图片路径会被当做字符串处理
   name: 'ArtList',
   data() {
     return {
@@ -85,7 +90,8 @@ export default {
         title: '', // 文章的标题
         cate_id: '', // 文章的id
         content: '', // 文章的内容
-        cover_img: ''// 封面图片保存的是个文件
+        cover_img: '', // 封面图片保存的是个文件
+        state: ''// 发布状态
       },
       pubFormRules: { // 表单的验证规则对象
         title: [
@@ -144,6 +150,11 @@ export default {
         const url = URL.createObjectURL(files[0])
         this.$refs.imgRef.setAttribute('src', url)
       }
+    },
+    // 点击发布或存为草稿的点击事件准备调用后端接口
+    pubArticleFn(str) {
+      this.pubForm.state = str
+      console.log(this.pubForm)
     }
   }
 }

@@ -44,14 +44,14 @@
         </el-form-item>
         <el-form-item label="文章分类" prop="cate_id">
          <el-select v-model="pubForm.cate_id" placeholder="请选择分类" style="width: 100%;">
-            <el-option v-for="obj in cateList" :key="obj.id" :label="obj.cate_name" :value="obj.cate_id"></el-option>
+            <el-option v-for="obj in cateList" :key="obj.id" :label="obj.cate_name" :value="obj.id"></el-option>
         </el-select>
         </el-form-item>
         <!-- 富文本编辑器 -->
         <el-form-item label="文章内容" prop="content">
-            <quill-editor v-model="pubForm.content"></quill-editor>
+            <quill-editor v-model="pubForm.content" @change="contentChangeFn"></quill-editor>
         </el-form-item>
-        <el-form-item label="文章封面">
+        <el-form-item label="文章封面" prop="cover_img">
          <!-- 用来显示封面的图片 -->
         <img src="../../assets/images/cover.jpg" alt="" class="cover-img" ref="imgRef" />
         <br />
@@ -98,8 +98,11 @@ export default {
           { required: true, message: '请输入文章标题', trigger: 'blur' },
           { min: 1, max: 30, message: '文章标题的长度为1-30个字符', trigger: 'blur' }
         ],
-        cate_id: [{ required: true, message: '请选择文章标题', trigger: 'blur' }],
-        content: [{ required: true, message: '请输入文章的内容', trigger: 'blur' }]
+        cate_id: [{ required: true, message: '请选择文章标题', trigger: 'change' }],
+        // 需要自己绑定失去焦点事件
+        content: [{ required: true, message: '请输入文章的内容', trigger: 'blur' }],
+        cover_img: [{ required: true, message: '请选择文章封面', trigger: 'blur' }]
+
       },
       // 保存文章分类列表的数据
       cateList: []
@@ -154,7 +157,20 @@ export default {
     // 点击发布或存为草稿的点击事件准备调用后端接口
     pubArticleFn(str) {
       this.pubForm.state = str
-      console.log(this.pubForm)
+      //   必须进行兜底校验
+      this.$refs.pubFormRef.validate(valid => {
+        if (valid) {
+          // 通过
+          console.log(this.pubForm)
+        } else {
+          return false
+        }
+      })
+    },
+    // 富文本编辑器内容改变触发此事件的方法
+    contentChangeFn() {
+      // 对部分表单字段进行校验的方法
+      this.$refs.pubFormRef.validateField('content')
     }
   }
 }

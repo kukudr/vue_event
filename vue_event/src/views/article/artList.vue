@@ -296,6 +296,11 @@ export default {
         return this.$message.error(res.message)
       }
       this.$message.success(res.message)
+      if (this.artList.length === 1) {
+        if (this.q.pagenum > 1) {
+          this.q.pagenum--
+        }
+      }
       this.getArtListFn()
     }
   }

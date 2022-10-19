@@ -5,7 +5,8 @@ import axios from 'axios'
 import router from '@/router'
 import { Message } from 'element-ui'
 // myAxios请求的时候地址baseURL+url然后去请求后台
-const myAxios = axios.create({ baseURL: 'http://big-event-vue-api-t.itheima.net' })
+export const baseURL = 'http://big-event-vue-api-t.itheima.net'
+const myAxios = axios.create({ baseURL })
 
 // 定义请求拦截器
 myAxios.interceptors.request.use(function (config) {

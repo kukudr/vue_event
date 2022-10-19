@@ -41,10 +41,13 @@
         </template>
       </el-table-column>
       <el-table-column label="状态" prop="state"></el-table-column>
-      <el-table-column label="操作"></el-table-column>
+      <!-- <el-table-column label="操作"></el-table-column> -->
+      <el-table-column label="操作">
+        <template v-slot="{ row }">
+         <el-button type="danger" size="mini" @click="removeFn(row.id)">删除</el-button>
+        </template>
+        </el-table-column>
     </el-table>
-
-      <!-- 分页区域 -->
       <!-- 分页区域 -->
 <el-pagination
   @size-change="handleSizeChangeFn"
@@ -93,18 +96,36 @@
         </el-form-item>
     </el-form>
     </el-dialog>
-  </div>
+    <!-- 查看文章详情的对话框 -->
+    <el-dialog title="文章预览" :visible.sync="detailVisible" width="80%">
+        <h1 class="title">{{ artDetail.title }}</h1>
+    <div class="info">
+         <span>作者：{{ artDetail.nickname || artDetail.username }}</span>
+         <span>发布时间：{{ $formatDate(artDetail.pub_date) }}</span>
+         <span>所属分类：{{ artDetail.cate_name }}</span>
+         <span>状态：{{ artDetail.state }}</span>
+    </div>
+        <!-- 分割线 -->
+        <el-divider></el-divider>
+        <!-- 文章的封面 -->
+        <img alt=""  v-if="artDetail.cover_img" :src="baseURLR + artDetail.cover_img "/>
+        <!-- 文章的详情 -->
+         <div v-html="artDetail.content" class="detail-box"></div>
+    </el-dialog>
+</div>
 </template>
 
 <script>
-import { getArticleListAPI, uploadArticleAPI, getArtListAPI, getArtDetailAPI } from '@/api'
+import { getArticleListAPI, uploadArticleAPI, getArtListAPI, getArtDetailAPI, delArticleAPI } from '@/api'
 // JS内部引入图片需要用import导入，webpack会把它当作模块数据，转换成打包后的图片路径还是base64字符串
 import imgObj from '@/assets/images/cover.jpg'
+import { baseURL } from '@/utils/request'
 export default {
   // 在Vue变量内部引入图片路径会被当做字符串处理
   name: 'ArtList',
   data() {
     return {
+      baseURLR: baseURL,
       // 查询参数对象
       q: {
         pagenum: 1,
@@ -134,7 +155,9 @@ export default {
       // 保存文章分类列表的数据
       cateList: [],
       artList: [], // 文章列表
-      total: 0
+      total: 0,
+      detailVisible: false, // 用于查看文章详情的对话框
+      artDetail: {}
 
     }
   },
@@ -258,9 +281,22 @@ export default {
       this.getArtListFn()
     },
     async showDetailFn(artId) {
+      // 点击详情的时候显示对话框
+      this.detailVisible = true
       //  获取文章的详情
       const res = await getArtDetailAPI(artId)
       console.log(res)
+      this.artDetail = res.data.data
+    },
+    // 删除文章的点击事件
+    async removeFn(artId) {
+      const { data: res } = await delArticleAPI(artId)
+      //   console.log(res)
+      if (res.code !== 0) {
+        return this.$message.error(res.message)
+      }
+      this.$message.success(res.message)
+      this.getArtListFn()
     }
   }
 }
@@ -287,5 +323,26 @@ export default {
   width: 400px;
   height: 280px;
   object-fit: cover;
+}
+.title {
+  font-size: 24px;
+  text-align: center;
+  font-weight: normal;
+  color: #000;
+  margin: 0 0 10px 0;
+}
+
+.info {
+  font-size: 12px;
+  span {
+    margin-right: 20px;
+  }
+}
+
+// 修改 dialog 内部元素的样式，需要添加样式穿透
+::v-deep .detail-box {
+  img {
+    width: 500px;
+  }
 }
 </style>

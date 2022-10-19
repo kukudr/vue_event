@@ -83,13 +83,10 @@ export default {
       this.$refs.form.validate(async valid => {
         if (valid) {
           // 通过校验,拿到绑定的数据
-          //   console.log(typeof this.form.username)
           //   1.调用注册接口
           const { data: res } = await registerAPI(this.form)
-          //   console.log(res)
           if (res.code !== 0) {
             // 2.注册失败提示用户
-            // console.log(res)
             return this.$message.error(res.message)
           }
           // 3.注册成功，提示用户

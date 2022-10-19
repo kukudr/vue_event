@@ -118,7 +118,6 @@ export default {
             this.$message.success(res.message)
             this.dialogVisible = false
           }
-          //   console.log(res)
           // 添加成功后再次请求最新的数据让表格更新
           //   特别注意生命周期的函数不会挂载到this上
           this.getArticleFn()
@@ -135,7 +134,6 @@ export default {
     // 修改分类按钮的点击事件(先做数据的回显)
     updateCateFn(obj) {
       // obj的值是一个文章的对象
-      console.log(obj)
       //   实现状态区分
       this.isEdit = true
       this.editId = obj.id

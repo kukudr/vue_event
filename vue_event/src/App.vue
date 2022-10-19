@@ -12,11 +12,9 @@ export default {
   // eslint-disable-next-line space-before-function-paren
   //   async created() {
   //     const res = await registerAPI()
-  //     console.log(res)
   //   },
   //   created() {
   //     getUserInfoAPI().then(res => {
-  //       console.log(res)
   //     })
   //   }
 }

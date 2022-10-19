@@ -216,7 +216,6 @@ export default {
       this.$refs.pubFormRef.validate(async valid => {
         if (valid) {
           // 通过校验
-          console.log(this.pubForm)
           const fd = new FormData()// H5新增的表单数据对象
           fd.append('title', this.pubForm.title)
           fd.append('cate_id', this.pubForm.cate_id)
@@ -228,7 +227,6 @@ export default {
             return this.$message.error(res.message)
           }
           this.$message.success(res.message)
-          console.log(res)
           // 关闭对话框
           this.pubDialogVisible = false
           //   刷新文章列表,再次请求数据
@@ -285,13 +283,11 @@ export default {
       this.detailVisible = true
       //  获取文章的详情
       const res = await getArtDetailAPI(artId)
-      console.log(res)
       this.artDetail = res.data.data
     },
     // 删除文章的点击事件
     async removeFn(artId) {
       const { data: res } = await delArticleAPI(artId)
-      //   console.log(res)
       if (res.code !== 0) {
         return this.$message.error(res.message)
       }

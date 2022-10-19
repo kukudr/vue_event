@@ -121,15 +121,12 @@ export default {
         })
     },
     handleOpen(key, keyPath) {
-      console.log(key, keyPath)
     },
     handleClose(key, keyPath) {
-      console.log(key, keyPath)
     },
     // 请求侧边栏数据
     async getMenuListFn() {
       const res = await getMenuListAPI()
-      //   console.log(res)
       this.menus = res.data.data
     }
   },

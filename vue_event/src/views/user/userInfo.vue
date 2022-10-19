@@ -60,7 +60,6 @@ export default {
     submitFn() {
       this.$refs.userFormRef.validate(async valid => {
         if (valid) {
-          console.log(this.userForm)
           // 因为后端更新用户基本资料需要携带id 但是userForm本身没有这些属性
           //   需要给userForm添加属性
           this.userForm.id = this.$store.state.userInfo.id

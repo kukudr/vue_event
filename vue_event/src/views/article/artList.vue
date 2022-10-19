@@ -10,7 +10,7 @@
         <el-form :inline="true" :model="q">
           <el-form-item label="文章分类">
             <el-select v-model="q.cate_id" placeholder="请选择分类" size="small">
-                <el-option v-for="obj in cateList" :key="obj.id" :label="obj.cate_name" :value="obj.cate_id"></el-option>
+                <el-option v-for="obj in cateList" :key="obj.id" :label="obj.cate_name" :value="obj.id"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="发布状态" style="margin-left: 15px;">
@@ -20,23 +20,50 @@
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" size="small">筛选</el-button>
-            <el-button type="info" size="small">重置</el-button>
+            <el-button type="primary" size="small" @click="choseFn">筛选</el-button>
+            <el-button type="info" size="small" @click="resetFn">重置</el-button>
           </el-form-item>
         </el-form>
         <!-- 发表文章的按钮 -->
         <el-button type="primary" size="small" class="btn-pub" @click="showPubDialogFn">发表文章</el-button>
       </div>
-
       <!-- 文章表格区域 -->
+    <el-table :data="artList" style="width: 100%;" border stripe>
+        <el-table-column label="文章标题" prop="title">
+            <template v-slot="scope">
+            <el-link type="primary" @click="showDetailFn(scope.row.id)">{{ scope.row.title }}</el-link>
+         </template>
+      </el-table-column>
+      <el-table-column label="分类" prop="cate_name"></el-table-column>
+      <el-table-column label="发表时间" prop="pub_date">
+        <template v-slot="scope">
+            <span>{{$formatDate(scope.row.pub_date)}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" prop="state"></el-table-column>
+      <el-table-column label="操作"></el-table-column>
+    </el-table>
 
       <!-- 分页区域 -->
+      <!-- 分页区域 -->
+<el-pagination
+  @size-change="handleSizeChangeFn"
+  @current-change="handleCurrentChangeFn"
+  :current-page.sync="q.pagenum"
+  :page-sizes="[2, 3, 5, 10]"
+  :page-size.sync="q.pagesize"
+  layout="total, sizes, prev, pager, next, jumper"
+  :total="total"
+>
+</el-pagination>
     </el-card>
     <!-- 发表文章的 Dialog 对话框 -->
     <el-dialog title="发表文章"
     :visible.sync="pubDialogVisible"
     fullscreen
-    :before-close="handleClose">
+    :before-close="handleClose"
+    @close="dialogCloseFn"
+    >
     <!-- 发布文章的对话框 -->
     <el-form :model="pubForm" :rules="pubFormRules" ref="pubFormRef" label-width="100px">
         <el-form-item label="文章标题" prop="title">
@@ -49,7 +76,7 @@
         </el-form-item>
         <!-- 富文本编辑器 -->
         <el-form-item label="文章内容" prop="content">
-            <quill-editor v-model="pubForm.content" @change="contentChangeFn"></quill-editor>
+            <quill-editor v-model="pubForm.content" @blur="contentChangeFn"></quill-editor>
         </el-form-item>
         <el-form-item label="文章封面" prop="cover_img">
          <!-- 用来显示封面的图片 -->
@@ -70,7 +97,7 @@
 </template>
 
 <script>
-import { getArticleListAPI } from '@/api'
+import { getArticleListAPI, uploadArticleAPI, getArtListAPI, getArtDetailAPI } from '@/api'
 // JS内部引入图片需要用import导入，webpack会把它当作模块数据，转换成打包后的图片路径还是base64字符串
 import imgObj from '@/assets/images/cover.jpg'
 export default {
@@ -81,7 +108,7 @@ export default {
       // 查询参数对象
       q: {
         pagenum: 1,
-        pagesize: 2,
+        pagesize: 5,
         cate_id: '',
         state: ''
       },
@@ -105,12 +132,15 @@ export default {
 
       },
       // 保存文章分类列表的数据
-      cateList: []
+      cateList: [],
+      artList: [], // 文章列表
+      total: 0
 
     }
   },
   created() {
     this.getCateListFn()
+    this.getArtListFn()
   },
   methods: {
     // 发布文章对话框关闭前的回调
@@ -153,15 +183,33 @@ export default {
         const url = URL.createObjectURL(files[0])
         this.$refs.imgRef.setAttribute('src', url)
       }
+      //   让表单单独校验这个表单
+      this.$refs.pubFormRef.validateField('cover_img')
     },
     // 点击发布或存为草稿的点击事件准备调用后端接口
     pubArticleFn(str) {
       this.pubForm.state = str
       //   必须进行兜底校验
-      this.$refs.pubFormRef.validate(valid => {
+      this.$refs.pubFormRef.validate(async valid => {
         if (valid) {
-          // 通过
+          // 通过校验
           console.log(this.pubForm)
+          const fd = new FormData()// H5新增的表单数据对象
+          fd.append('title', this.pubForm.title)
+          fd.append('cate_id', this.pubForm.cate_id)
+          fd.append('content', this.pubForm.content)
+          fd.append('cover_img', this.pubForm.cover_img)
+          fd.append('state', this.pubForm.state)
+          const { data: res } = await uploadArticleAPI(fd)
+          if (res.code !== 0) {
+            return this.$message.error(res.message)
+          }
+          this.$message.success(res.message)
+          console.log(res)
+          // 关闭对话框
+          this.pubDialogVisible = false
+          //   刷新文章列表,再次请求数据
+          this.getArtListFn()
         } else {
           return false
         }
@@ -171,6 +219,48 @@ export default {
     contentChangeFn() {
       // 对部分表单字段进行校验的方法
       this.$refs.pubFormRef.validateField('content')
+    },
+    // 新增文章后对话框关闭清空表单
+    dialogCloseFn() {
+      this.$refs.pubFormRef.resetFields()
+      //   我们需要手动给封面添加一个初始值，他没有受到v-model的影响
+      this.$refs.imgRef.setAttribute('src', imgObj)
+    },
+    // 获取文章列表的方法
+    async getArtListFn() {
+      const { data: res } = await getArtListAPI(this.q)
+      // 保存当前获取的文章列表
+      this.artList = res.data
+      // 保存总数
+      this.total = res.total
+    },
+    // 分页每页条数改变触发
+    handleSizeChangeFn(sizes) {
+      this.q.pagesize = sizes
+      this.q.pagenum = 1
+      this.getArtListFn()
+    },
+    // 当前页码改变时触发
+    handleCurrentChangeFn(nowPage) {
+      this.q.pagenum = nowPage
+      this.getArtListFn()
+    },
+    choseFn() {
+      this.q.pagenum = 1
+      this.q.pagesize = 2
+      this.getArtListFn()
+    },
+    resetFn() {
+      this.q.pagenum = 1
+      this.q.pagesize = 2
+      this.q.state = ''
+      this.q.cate_id = ''
+      this.getArtListFn()
+    },
+    async showDetailFn(artId) {
+      //  获取文章的详情
+      const res = await getArtDetailAPI(artId)
+      console.log(res)
     }
   }
 }
